@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Security Research Test</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: #00ff00; padding: 20px; }
+        .data { border: 1px solid #333; padding: 10px; margin-top: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h2>Device Fingerprinting Data</h2>
+    <p>Ye data koi bhi website bina 'Allow' dabaye le sakti hai:</p>
+    
+    <div class="data" id="info">
+        Scanning device...
+    </div>
+
+    <script>
+        const info = document.getElementById('info');
+        
+        // 1. Browser & OS details
+        let details = `<b>User Agent:</b> ${navigator.userAgent}<br>`;
+        
+        // 2. Battery Status (Privacy concern)
+        if (navigator.getBattery) {
+            navigator.getBattery().then(battery => {
+                details += `<b>Battery Level:</b> ${battery.level * 100}%<br>`;
+                details += `<b>Is Charging:</b> ${battery.charging}<br>`;
+                updateUI();
+            });
+        }
+
+        // 3. Hardware Info
+        details += `<b>CPU Cores:</b> ${navigator.hardwareConcurrency}<br>`;
+        details += `<b>RAM (Approx):</b> ${navigator.deviceMemory} GB<br>`;
+        details += `<b>Screen Resolution:</b> ${window.screen.width}x${window.screen.height}<br>`;
+        
+        function updateUI() {
+            info.innerHTML = details;
+        }
+        updateUI();
+    </script>
+</body>
+</html>
