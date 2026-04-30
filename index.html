@@ -1,44 +1,73 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Security Research Test</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Awareness Experiment</title>
     <style>
-        body { font-family: sans-serif; background: #121212; color: #00ff00; padding: 20px; }
-        .data { border: 1px solid #333; padding: 10px; margin-top: 10px; border-radius: 5px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; overflow: hidden; }
+        .card { background: #1e293b; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); max-width: 400px; text-align: center; border: 1px solid #334155; }
+        h1 { color: #ef4444; font-size: 1.5rem; margin-bottom: 1rem; }
+        p { line-height: 1.6; color: #94a3b8; }
+        .btn { background: #3b82f6; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 1rem; width: 100%; transition: 0.3s; }
+        .btn:hover { background: #2563eb; }
+        .disclaimer { font-size: 0.75rem; margin-top: 1.5rem; color: #64748b; font-style: italic; }
+        #log-screen { display: none; text-align: left; background: #000; padding: 15px; border-radius: 8px; font-family: 'Courier New', Courier, monospace; font-size: 0.85rem; color: #22c55e; border: 1px solid #22c55e; max-height: 300px; overflow-y: auto; }
     </style>
 </head>
 <body>
-    <h2>Device Fingerprinting Data</h2>
-    <p>Ye data koi bhi website bina 'Allow' dabaye le sakti hai:</p>
-    
-    <div class="data" id="info">
-        Scanning device...
+
+    <div class="card" id="main-card">
+        <h1>⚠️ Security Alert</h1>
+        <p>Aapke device mein ek potential threat detect hua hai. Scan karne ke liye niche click karein.</p>
+        <button class="btn" onclick="startSimulation()">Start Secure Scan</button>
+        
+        <p class="disclaimer">
+            <b>NOTE:</b> This site is only for <b>EDUCATIONAL PURPOSES</b>. Ye ek social experiment hai ye dikhane ke liye ki "Allow" karne par aapka sensitive data kaise leak ho sakta hai.
+        </p>
+    </div>
+
+    <div class="card" id="log-card" style="display:none; max-width: 500px;">
+        <h1 style="color: #fbbf24;">⚠️ DATA EXPOSED!</h1>
+        <p style="margin-bottom: 10px;">Agar ye asli attack hota, toh hacker ne ye sab background mein utha liya hota:</p>
+        <div id="log-screen"></div>
+        <button class="btn" style="background:#475569" onclick="location.reload()">Reset Experiment</button>
     </div>
 
     <script>
-        const info = document.getElementById('info');
-        
-        // 1. Browser & OS details
-        let details = `<b>User Agent:</b> ${navigator.userAgent}<br>`;
-        
-        // 2. Battery Status (Privacy concern)
-        if (navigator.getBattery) {
-            navigator.getBattery().then(battery => {
-                details += `<b>Battery Level:</b> ${battery.level * 100}%<br>`;
-                details += `<b>Is Charging:</b> ${battery.charging}<br>`;
-                updateUI();
-            });
-        }
+        function startSimulation() {
+            document.getElementById('main-card').style.display = 'none';
+            document.getElementById('log-card').style.display = 'block';
+            const screen = document.getElementById('log-screen');
+            screen.style.display = 'block';
 
-        // 3. Hardware Info
-        details += `<b>CPU Cores:</b> ${navigator.hardwareConcurrency}<br>`;
-        details += `<b>RAM (Approx):</b> ${navigator.deviceMemory} GB<br>`;
-        details += `<b>Screen Resolution:</b> ${window.screen.width}x${window.screen.height}<br>`;
-        
-        function updateUI() {
-            info.innerHTML = details;
+            const logs = [
+                "> Connection established with remote server...",
+                "> Extracting User-Agent: " + navigator.userAgent,
+                "> IP Address: [SIMULATED_LOG_ACCESS]",
+                "> Bypassing Sandbox... (In a real exploit)",
+                "> Accessing Storage: /sdcard/DCIM/Photos",
+                "> Found 1,432 private images...",
+                "> Accessing WhatsApp database backup...",
+                "> Capturing Keylogs: 'Password123' detected",
+                "> Activating Background Microphone...",
+                "> TRAPPED: All data sent to hacker@darkweb.xyz",
+                "-------------------------------------------",
+                "> EXPERIMENT COMPLETE: Never click unknown links!"
+            ];
+
+            let i = 0;
+            function printLog() {
+                if (i < logs.length) {
+                    screen.innerHTML += logs[i] + "<br>";
+                    screen.scrollTop = screen.scrollHeight;
+                    i++;
+                    setTimeout(printLog, 600);
+                }
+            }
+            printLog();
         }
-        updateUI();
     </script>
+
 </body>
 </html>
